@@ -1,0 +1,20 @@
+<resources>
+
+    <string name="app_name">List</string>
+    <string name="title_activity_main">Compass</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_edit_item">Edit item</string>
+    <string name="update">Update</string>
+    <string name="caption">Caption</string>
+    <string name="description">Description</string>
+    <string name="title_add_item">Add item</string>
+    <string name="add">Add</string>
+    <string name="new_item">New item</string>
+    <string name="filter">Filter</string>
+    <string name="clear">Clear</string>
+    <string name="empty_fields_alert">Fields must not be empty</string>
+    <string name="menu_populate">Populate</string>
+
+</resources>
