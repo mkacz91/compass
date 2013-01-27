@@ -10,62 +10,93 @@
         android:layout_above="@+id/buttons"
         android:layout_alignParentLeft="true"
         android:orientation="vertical" >
-
+
         <TextView
-            android:id="@+id/title_text_view"
+            android:id="@+id/place_edit_title_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/edit_place"
             android:textAppearance="?android:attr/textAppearanceLarge" />
-
+
         <TextView
-            android:id="@+id/name_field_name"
+            android:id="@+id/place_edit_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/field_name_left_padding"
             android:text="@string/name"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-
+
         <EditText
-            android:id="@+id/name_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/name"
-            android:textSize="@dimen/large_input_text_size" />
-
-        <TextView
-            android:id="@+id/longitude_field_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/field_name_left_padding"
-            android:text="@string/longitude"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <EditText
-            android:id="@+id/longitude_edit_text"
+            android:id="@+id/place_edit_name_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="text"
             android:textSize="@dimen/medium_input_text_size" />
-
-        <TextView
-            android:id="@+id/latitude_field_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/field_name_left_padding"
-            android:text="@string/latitude"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <EditText
-            android:id="@+id/latitude_edit_text"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text"
-            android:textSize="@dimen/medium_input_text_size" />
+            android:baselineAligned="true" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/place_editlatitude_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/field_name_left_padding"
+                    android:text="@string/latitude"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <EditText
+                    android:id="@+id/place_edit_latitude_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textSize="@dimen/medium_input_text_size" >
+
+                    <requestFocus />
+                </EditText>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/place_edit_longtitude_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/field_name_left_padding"
+                    android:text="@string/longitude"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <EditText
+                    android:id="@+id/place_edit_longitude_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textSize="@dimen/medium_input_text_size" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <com.mkacz.compass.ColorPicker
+            android:id="@+id/place_edit_color_picker"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
 
     </LinearLayout>
 

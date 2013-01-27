@@ -1,4 +1,5 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"><item android:id="@+id/menu_populate" android:title="@string/menu_populate"></item><item android:id="@+id/menu_add_place" android:title="@string/add_place"></item>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"><item android:id="@+id/menu_populate" android:title="@string/menu_populate"></item><item android:id="@+id/menu_show_selected" android:title="@string/show_selected"></item><item android:id="@+id/menu_add_place" android:title="@string/add_place"></item>
+
 
     
 </menu>

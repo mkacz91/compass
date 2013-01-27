@@ -57,7 +57,7 @@ public class PlacesAdapter extends BaseAdapter
 					? convertView
 					: inflater.inflate(R.layout.place_view, parent, false);
 		
-		Place place = places.get(position);
+		Place place = get(position);
 		CheckBox checkBox = (CheckBox) view.findViewById(
 				R.id.place_view_check_box);
 		TextView nameTextView = (TextView) view.findViewById(
@@ -70,9 +70,9 @@ public class PlacesAdapter extends BaseAdapter
 		checkBox.setOnCheckedChangeListener(place);
 		nameTextView.setText(place.getName());
 		coordinatesTextView.setText(
-				Coordinates.longitudeToString(place.getLongitude())
-				+ " " +
 				Coordinates.latitudeToString(place.getLatitude())
+				+ " " +
+				Coordinates.longitudeToString(place.getLongitude())
 		);
 		
 		return view;
@@ -117,14 +117,14 @@ public class PlacesAdapter extends BaseAdapter
 	{
 		filter(constraint);
 	}
-	/*
+	
 	public void notifyDataSetChanged()
 	{
 		if (constraint == null)
 			super.notifyDataSetChanged();
 		else
 			refilter();
-	}*/
+	}
 	
 	/*
 	 * A filter class that chooses only those places which names contain

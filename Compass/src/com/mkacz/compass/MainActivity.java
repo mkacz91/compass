@@ -64,6 +64,36 @@ public class MainActivity extends Activity
     	PlacesArchiver.store(places, preferences);
     	super.onPause();
     }
+       
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+    	switch (item.getItemId())
+    	{
+    	case R.id.menu_populate:
+    	{
+    		populateList();
+    		return true;
+    	}
+    		
+    	case R.id.menu_show_selected:
+    	{
+    		Intent intent = new Intent(this, CompassActivity.class);
+    		startActivity(intent);
+    		return true;
+    	}
+    		
+    	case R.id.menu_add_place:
+    	{
+    		Intent intent = new Intent(this, PlaceEditActivity.class);
+    		intent.putExtra(PlaceEditActivity.EXTRA_REQUEST_CODE, REQUEST_ADD);
+    		startActivityForResult(intent, REQUEST_ADD);
+    		return true;
+    	}
+    	}
+    	
+    	return super.onOptionsItemSelected(item);
+    }
     
     /*
      *  Handles Edit and Add information provided by PlaceEditActivity.
@@ -74,11 +104,11 @@ public class MainActivity extends Activity
     	if (resultCode != RESULT_OK) return;
     	
     	String name = data.getStringExtra(PlaceEditActivity.EXTRA_NAME);
-    	float longitude = data.getFloatExtra(
-    			PlaceEditActivity.EXTRA_LONGITUDE, 0);
     	float latitude = data.getFloatExtra(
     			PlaceEditActivity.EXTRA_LATITUDE, 0);
-    	int color = 0;
+    	float longitude = data.getFloatExtra(
+    			PlaceEditActivity.EXTRA_LONGITUDE, 0);
+    	int color = data.getIntExtra(PlaceEditActivity.EXTRA_COLOR, 0);
     	
     	switch (requestCode)
     	{
@@ -86,36 +116,17 @@ public class MainActivity extends Activity
     		Place place = adapter.get(data.getIntExtra(
     				PlaceEditActivity.EXTRA_POSITION, -1));
     		place.setName(name);
-    		place.setLongitude(longitude);
     		place.setLatitude(latitude);
+    		place.setLongitude(longitude);
     		place.setColor(color);
     		break;
     		
     	case REQUEST_ADD:
-    		adapter.add(new Place(name, longitude, latitude, color));
+    		adapter.add(new Place(name, latitude, longitude, color));
     		break;
     	}
     	
     	adapter.notifyDataSetChanged();
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-    	switch (item.getItemId())
-    	{	
-    	case R.id.menu_add_place:
-    		Intent intent = new Intent(this, PlaceEditActivity.class);
-    		intent.putExtra(PlaceEditActivity.EXTRA_REQUEST_CODE, REQUEST_ADD);
-    		startActivityForResult(intent, REQUEST_ADD);
-    		return true;
-    		
-    	case R.id.menu_populate:
-    		populateList();
-    		return true;
-    	}
-    	
-    	return super.onOptionsItemSelected(item);
     }
     
     /*
@@ -165,10 +176,12 @@ public class MainActivity extends Activity
     					REQUEST_EDIT);
     			intent.putExtra(PlaceEditActivity.EXTRA_POSITION, position);
     			intent.putExtra(PlaceEditActivity.EXTRA_NAME, place.getName());
-    			intent.putExtra(PlaceEditActivity.EXTRA_LONGITUDE,
-    					place.getLongitude());
     			intent.putExtra(PlaceEditActivity.EXTRA_LATITUDE,
     					place.getLatitude());
+    			intent.putExtra(PlaceEditActivity.EXTRA_LONGITUDE,
+    					place.getLongitude());
+    			intent.putExtra(PlaceEditActivity.EXTRA_COLOR,
+    					place.getColor());
     			startActivityForResult(intent, REQUEST_EDIT);
     			break;
     			
