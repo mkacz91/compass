@@ -84,6 +84,7 @@ public class MainActivity extends Activity
     	case R.id.menu_show_selected:
     	{
     		Intent intent = new Intent(this, CompassActivity.class);
+    		PlacesArchiver.putExtra(intent, EXTRA_PLACES, adapter.getChecked());
     		startActivity(intent);
     		return true;
     	}
@@ -208,8 +209,11 @@ public class MainActivity extends Activity
      */
     private void populateList()
     {
-    	adapter.add(new Place("Mój dom", -17, 50, 0));
-    	adapter.add(new Place("Grunwald", 25, 40, 0));
+    	adapter.add(new Place("Legnica", 51.216667f, 16.166667f, 0xFF33B5E5));
+    	adapter.add(new Place("Londyn", 51.5f, -0.1166670f, 0xFFAA66CC));
+    	adapter.add(new Place("Nowy Jork", 40.716667f, -74.0f, 0xFF99CC00));
+    	adapter.add(new Place("Moskwa", 55.75f, 37.616667f, 0xFFFFBB33));
+    	adapter.add(new Place("Pretoria", -25.725556f, 28.243889f, 0xFFFF4444));
     	adapter.notifyDataSetChanged();
     }
     

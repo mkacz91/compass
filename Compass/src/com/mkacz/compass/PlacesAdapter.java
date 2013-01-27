@@ -87,6 +87,15 @@ public class PlacesAdapter extends BaseAdapter
 		return displayedPlaces.get(position);
 	}
 	
+	public List<Place> getChecked()
+	{
+		List<Place> checkedPlaces = new LinkedList<Place>();
+		for (Place place : displayedPlaces)
+			if (place.isChecked())
+				checkedPlaces.add(place);
+		return checkedPlaces;
+	}
+	
 	public void add(Place place)
 	{
 		places.add(place);
