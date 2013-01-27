@@ -23,8 +23,15 @@ public class MainActivity extends Activity
 	/*
 	 * Request codes passed to PlaceEditActivity.
 	 */
-	public static final int	REQUEST_EDIT = 1;
-	public static final int	REQUEST_ADD = 2;
+	public static final int	REQUEST_PLACE_EDIT = 1;
+	public static final int	REQUEST_PLACE_ADD = 2;
+	
+	/*
+	 * Keywords used when packing places to SharedPreferences or Intent.
+	 */
+	public static final String EXTRA_PLACE = "place";
+	public static final String EXTRA_PLACES = "places";
+	public static final String KEY_PLACES = "places";
 	
 	private List<Place> places;
 	private PlacesAdapter adapter;
@@ -40,7 +47,7 @@ public class MainActivity extends Activity
         filterEditText.addTextChangedListener(new FilterTextWatcher());
         
         SharedPreferences preferences = this.getPreferences(MODE_PRIVATE);
-        places = PlacesArchiver.restore(preferences);
+        places = PlacesArchiver.getPlaces(preferences, KEY_PLACES);
         
         adapter = new PlacesAdapter(this, places);
         ListView listView = (ListView) findViewById(R.id.list_view);
@@ -61,7 +68,7 @@ public class MainActivity extends Activity
     public void onPause()
     {
     	SharedPreferences preferences = this.getPreferences(MODE_PRIVATE);
-    	PlacesArchiver.store(places, preferences);
+    	PlacesArchiver.putPlaces(preferences, EXTRA_PLACES, places);
     	super.onPause();
     }
        
@@ -71,10 +78,8 @@ public class MainActivity extends Activity
     	switch (item.getItemId())
     	{
     	case R.id.menu_populate:
-    	{
     		populateList();
     		return true;
-    	}
     		
     	case R.id.menu_show_selected:
     	{
@@ -82,12 +87,12 @@ public class MainActivity extends Activity
     		startActivity(intent);
     		return true;
     	}
-    		
     	case R.id.menu_add_place:
     	{
     		Intent intent = new Intent(this, PlaceEditActivity.class);
-    		intent.putExtra(PlaceEditActivity.EXTRA_REQUEST_CODE, REQUEST_ADD);
-    		startActivityForResult(intent, REQUEST_ADD);
+    		intent.putExtra(PlaceEditActivity.EXTRA_REQUEST_CODE,
+    				REQUEST_PLACE_ADD);
+    		startActivityForResult(intent, REQUEST_PLACE_ADD);
     		return true;
     	}
     	}
@@ -103,26 +108,18 @@ public class MainActivity extends Activity
     {
     	if (resultCode != RESULT_OK) return;
     	
-    	String name = data.getStringExtra(PlaceEditActivity.EXTRA_NAME);
-    	float latitude = data.getFloatExtra(
-    			PlaceEditActivity.EXTRA_LATITUDE, 0);
-    	float longitude = data.getFloatExtra(
-    			PlaceEditActivity.EXTRA_LONGITUDE, 0);
-    	int color = data.getIntExtra(PlaceEditActivity.EXTRA_COLOR, 0);
-    	
     	switch (requestCode)
     	{
-    	case REQUEST_EDIT:
-    		Place place = adapter.get(data.getIntExtra(
+    	case REQUEST_PLACE_EDIT:
+    	{
+    		Place passedPlace = PlacesArchiver.getPlaceExtra(data, EXTRA_PLACE);
+    		Place editedPlace = adapter.get(data.getIntExtra(
     				PlaceEditActivity.EXTRA_POSITION, -1));
-    		place.setName(name);
-    		place.setLatitude(latitude);
-    		place.setLongitude(longitude);
-    		place.setColor(color);
+    		editedPlace.set(passedPlace);
     		break;
-    		
-    	case REQUEST_ADD:
-    		adapter.add(new Place(name, latitude, longitude, color));
+    	}	
+    	case REQUEST_PLACE_ADD:
+    		adapter.add(PlacesArchiver.getPlaceExtra(data, EXTRA_PLACE));
     		break;
     	}
     	
@@ -170,20 +167,16 @@ public class MainActivity extends Activity
     		switch (which)
     		{
     		case DialogInterface.BUTTON_POSITIVE:
+    		{
     			Intent intent = new Intent(getApplicationContext(),
     					PlaceEditActivity.class);
     			intent.putExtra(PlaceEditActivity.EXTRA_REQUEST_CODE,
-    					REQUEST_EDIT);
+    					REQUEST_PLACE_EDIT);
     			intent.putExtra(PlaceEditActivity.EXTRA_POSITION, position);
-    			intent.putExtra(PlaceEditActivity.EXTRA_NAME, place.getName());
-    			intent.putExtra(PlaceEditActivity.EXTRA_LATITUDE,
-    					place.getLatitude());
-    			intent.putExtra(PlaceEditActivity.EXTRA_LONGITUDE,
-    					place.getLongitude());
-    			intent.putExtra(PlaceEditActivity.EXTRA_COLOR,
-    					place.getColor());
-    			startActivityForResult(intent, REQUEST_EDIT);
+    			PlacesArchiver.putExtra(intent, EXTRA_PLACE, place);
+    			startActivityForResult(intent, REQUEST_PLACE_EDIT);
     			break;
+    		}
     			
     		case DialogInterface.BUTTON_NEGATIVE:
     			adapter.remove(place);

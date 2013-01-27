@@ -33,6 +33,15 @@ public class Place implements OnCheckedChangeListener
 		this.checked = checked;
 	}
 	
+	public void set(Place place)
+	{
+		name = place.name;
+		latitude = place.latitude;
+		longitude = place.longitude;
+		color = place.color;
+		checked = place.checked;
+	}
+	
 	public void setName(String name)
 	{
 		this.name = name;

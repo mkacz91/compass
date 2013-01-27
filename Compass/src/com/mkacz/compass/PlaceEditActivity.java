@@ -14,18 +14,11 @@ import android.widget.Toast;
  */
 public class PlaceEditActivity extends Activity
 {	
-	/*
-	 * Constants used as Intent extra keys.
-	 */
-	static final String EXTRA_REQUEST_CODE = "reqc";
-	static final String EXTRA_POSITION = "pos";
-	static final String EXTRA_NAME = "name";
-	static final String EXTRA_LATITUDE = "lat";
-	static final String EXTRA_LONGITUDE = "lon";
-	static final String EXTRA_COLOR = "color";
+	static final String EXTRA_REQUEST_CODE = "request_code";
+	static final String EXTRA_POSITION = "position";
 	
-	private int position;
 	private int requestCode;
+	private int position;
 	private EditText nameEditText;
 	private EditText latitudeEditText;
 	private EditText longitudeEditText;
@@ -38,8 +31,9 @@ public class PlaceEditActivity extends Activity
 	    setContentView(R.layout.activity_place_edit);
 	    
 	    Intent intent = getIntent();
-	    position = intent.getIntExtra(EXTRA_POSITION, -1);
+	    
 	    requestCode = intent.getIntExtra(EXTRA_REQUEST_CODE, -1);
+	    position = intent.getIntExtra(EXTRA_POSITION, -1);
 	    nameEditText = (EditText) findViewById(R.id.place_edit_name_edit_text);
 	    latitudeEditText = (EditText) findViewById(
 	    		R.id.place_edit_latitude_edit_text);
@@ -58,18 +52,21 @@ public class PlaceEditActivity extends Activity
 	    
 	    switch (intent.getIntExtra(EXTRA_REQUEST_CODE, -1))
 	    {
-	    case MainActivity.REQUEST_EDIT:
+	    case MainActivity.REQUEST_PLACE_EDIT:
+	    {
+	    	Place place = PlacesArchiver.getPlaceExtra(intent,
+	    			MainActivity.EXTRA_PLACE);
 	    	titleTextView.setText(R.string.edit_place);
-	    	nameEditText.setText(intent.getStringExtra(EXTRA_NAME));
+	    	nameEditText.setText(place.getName());
 	    	latitudeEditText.setText(Coordinates.latitudeToString(
-	    		intent.getFloatExtra(EXTRA_LATITUDE, 0)));
+	    			place.getLatitude()));
 	    	longitudeEditText.setText(Coordinates.longitudeToString(
-	    		intent.getFloatExtra(EXTRA_LONGITUDE, 0)));
-	    	colorPicker.setPickedColor(intent.getIntExtra(EXTRA_COLOR, 0));
+	    			place.getLongitude()));
+	    	colorPicker.setPickedColor(place.getColor());
 	    	confirmButton.setText(R.string.update);
 	    	break;
-	    	
-	    case MainActivity.REQUEST_ADD:
+	    }
+	    case MainActivity.REQUEST_PLACE_ADD:
 	    	titleTextView.setText(R.string.add_place);
 	    	confirmButton.setText(R.string.add);
 	    	break;
@@ -110,12 +107,10 @@ public class PlaceEditActivity extends Activity
 	            	return;
 	            }
 				Intent result = new Intent();
-				if (requestCode == MainActivity.REQUEST_EDIT)
+				if (requestCode == MainActivity.REQUEST_PLACE_EDIT)
 					result.putExtra(EXTRA_POSITION, position);
-				result.putExtra(EXTRA_NAME, name);
-				result.putExtra(EXTRA_LATITUDE, latitude);
-				result.putExtra(EXTRA_LONGITUDE, longitude);
-				result.putExtra(EXTRA_COLOR, color);
+				PlacesArchiver.putExtra(result, MainActivity.EXTRA_PLACE,
+						new Place(name, latitude, longitude, color));
 				setResult(RESULT_OK, result);
 				break;
 			}
