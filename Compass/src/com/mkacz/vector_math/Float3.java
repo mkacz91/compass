@@ -22,6 +22,13 @@ public class Float3
 		this.z = z;
 	}
 	
+	public void set(float x, float y, float z)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
 	public static Float3 add(Float3 a, Float3 b)
 	{
 		return new Float3(a.x + b.x, a.y + b.y, a.z + b.z);

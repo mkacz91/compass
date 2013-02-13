@@ -25,6 +25,12 @@ public class Float2
 		this.y = y;
 	}
 	
+	public void set(Float2 v)
+	{
+		x = v.x;
+		y = v.y;
+	}
+	
 	public void mul(float s)
 	{
 		x *= s;

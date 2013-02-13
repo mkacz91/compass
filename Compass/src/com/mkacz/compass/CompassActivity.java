@@ -37,7 +37,16 @@ public class CompassActivity extends Activity implements SensorEventListener
 	    List<Place> places = PlacesArchiver.getPlaceListExtra(intent,
 	    		MainActivity.EXTRA_PLACES);
 	    compassView = (CompassView) findViewById(R.id.compass_view);
-	    compassView.setPlaces(places);
+	    compassView.addPlaces(places);
+	    
+		if (/* location unavailable */ true)
+		{
+			compassView.setCoordinates(Coordinates.WROCLAW_LATITUDE,
+		    		Coordinates.WROCLAW_LONGITUDE);
+		    Toast toast = Toast.makeText(this, R.string.location_error,
+		    		Toast.LENGTH_LONG);
+			toast.show();
+		}
 	
 	    sensorManager = (SensorManager) getSystemService(
 	    		Context.SENSOR_SERVICE);

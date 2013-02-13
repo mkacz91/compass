@@ -161,8 +161,8 @@ public class PlacesArchiver
 				String[] fields = splitUnescaped(record, FIELD_SEPARATOR);
 				places.add(new Place(
 						fields[0],                      // name
-						Float.parseFloat(fields[1]),    // longitude
 						Float.parseFloat(fields[2]),    // latitude
+						Float.parseFloat(fields[1]),    // longitude
 						Integer.parseInt(fields[3]),    // color
 						Boolean.parseBoolean(fields[4]) // checked
 					));

@@ -23,7 +23,7 @@ import com.mkacz.vector_math.Float3;
 public class CompassView extends View
 {
 	/*
-	 * Some constants defining appearance. Could be modable but let's not
+	 * Some constants defining appearance. Could be mutable but let's not
 	 * complicate it.
 	 */
 	private static final float RADIUS_FACTOR = 0.2f;
@@ -45,8 +45,9 @@ public class CompassView extends View
 	private Float2 center = new Float2(0, 0);
 	private Float2 north = new Float2(0, -1);
 	private Float2 east = new Float2(1, 0);
-	private float latitude = 0;
-	private float longitude = 0;
+	private Float3 worldPosition = new Float3(1, 0, 0);
+	private Float3 worldNorth = new Float3(0, 0, 1);
+	private Float3 worldEast = new Float3(0, 1, 0);
 	
 	/*
 	 * Primitives to be drawn.
@@ -55,7 +56,7 @@ public class CompassView extends View
 	private Path path = new Path();
 	private RectF border = new RectF();
 	private RectF dotRect = new RectF();
-	private List<Place> places = null;
+	private List<Place> places = new LinkedList<Place>();
 	private List<Float2> dots = new LinkedList<Float2>();
 	private Float2 offset = new Float2();
 	
@@ -73,38 +74,61 @@ public class CompassView extends View
 		paint.setColor(CIRCLE_COLOR);
 		canvas.drawOval(border, paint);
 		
-		// Draw needle.
+		//Draw needle
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(NEEDLE_NORTH_COLOR);
 		path.reset();
-		path.lineTo(NEEDLE_WIDTH * east.x, NEEDLE_WIDTH * east.y);
-		path.lineTo(NEEDLE_LENGTH * north.x, NEEDLE_LENGTH * north.y);
+		path.moveTo(center.x, center.y);
+		path.lineTo(
+				center.x + NEEDLE_WIDTH * east.x,
+				center.y + NEEDLE_WIDTH * east.y
+			);
+		path.lineTo(
+				center.x + NEEDLE_LENGTH * north.x,
+				center.y + NEEDLE_LENGTH * north.y
+			);
 		path.close();
-		path.offset(center.x, center.y);
 		canvas.drawPath(path, paint);
 		
 		paint.setColor(NEEDLE_NORTH_SHADOW_COLOR);
 		path.reset();
-		path.lineTo(-NEEDLE_WIDTH * east.x, -NEEDLE_WIDTH * east.y);
-		path.lineTo(NEEDLE_LENGTH * north.x, NEEDLE_LENGTH * north.y);
+		path.moveTo(center.x, center.y);
+		path.lineTo(
+				center.x - NEEDLE_WIDTH * east.x,
+				center.y - NEEDLE_WIDTH * east.y
+			);
+		path.lineTo(
+				center.x + NEEDLE_LENGTH * north.x,
+				center.y + NEEDLE_LENGTH * north.y);
 		path.close();
-		path.offset(center.x, center.y);
 		canvas.drawPath(path, paint);
 		
 		paint.setColor(NEEDLE_SOUTH_COLOR);
 		path.reset();
-		path.lineTo(-NEEDLE_WIDTH * east.x, -NEEDLE_WIDTH * east.y);
-		path.lineTo(-NEEDLE_LENGTH * north.x, -NEEDLE_LENGTH * north.y);
+		path.moveTo(center.x, center.y);
+		path.lineTo(
+				center.x - NEEDLE_WIDTH * east.x,
+				center.y - NEEDLE_WIDTH * east.y
+			);
+		path.lineTo(
+				center.x - NEEDLE_LENGTH * north.x,
+				center.y - NEEDLE_LENGTH * north.y
+			);
 		path.close();
-		path.offset(center.x, center.y);
 		canvas.drawPath(path, paint);
 		
 		paint.setColor(NEEDLE_SOUTH_SHADOW_COLOR);
 		path.reset();
-		path.lineTo(NEEDLE_WIDTH * east.x, NEEDLE_WIDTH * east.y);
-		path.lineTo(-NEEDLE_LENGTH * north.x, -NEEDLE_LENGTH * north.y);
+		path.moveTo(center.x, center.y);
+		path.lineTo(
+				center.x + NEEDLE_WIDTH * east.x,
+				center.y + NEEDLE_WIDTH * east.y
+			);
+		path.lineTo(
+				center.x - NEEDLE_LENGTH * north.x,
+				center.y - NEEDLE_LENGTH * north.y
+			);
 		path.close();
-		path.offset(center.x, center.y);
 		canvas.drawPath(path, paint);
 		
 		// Draw places.
@@ -112,6 +136,7 @@ public class CompassView extends View
 		Iterator<Place> placeIt = places.iterator();
 		while (dotIt.hasNext())
 		{
+			// Draw colored dot.
 			Float2 dot = dotIt.next();
 			Place place = placeIt.next();
 			dotRect.set(
@@ -128,6 +153,7 @@ public class CompassView extends View
 			paint.setColor(place.getColor());
 			canvas.drawOval(dotRect, paint);
 			
+			// Draw name
 			paint.setColor(TEXT_COLOR);
 			path.reset();
 			path.moveTo(center.x + offset.x, center.y + offset.y);
@@ -150,25 +176,52 @@ public class CompassView extends View
 		north.mul(radius / oldRadius);
 		border.set(-radius, -radius, radius, radius);
 		border.offset(center.x, center.y);
+		invalidate();
 	}
 	
+	/*
+	 * Set the coordinates of the observer.
+	 */
 	public void setCoordinates(float latitude, float longitude)
 	{
-		// Automatically convert to radians.
-		this.latitude = degToRad(latitude);
-		this.longitude = degToRad(longitude);
+		worldPosition = Coordinates.positionOnSphere(latitude, longitude);
+		// Extra caution near poles.
+		if (Math.abs(latitude) < Coordinates.CRITICAL_LATITUDE)
+			worldEast.set(
+					FloatMath.sin(Coordinates.degToRad(longitude)),
+					FloatMath.cos(Coordinates.degToRad(longitude)),
+					0
+				);
+		else if (latitude <= 0)
+		{
+			Float3 toNorthPole = Float3.dif(new Float3(0, 0, 1), worldPosition);
+			worldEast = Float3.cross(toNorthPole, worldPosition).normalized();
+		}
+		else
+		{
+			Float3 toSouthPole = Float3.dif(new Float3(0, 0,-1), worldPosition);
+			worldEast = Float3.cross(worldPosition, toSouthPole).normalized();
+		}
+		worldNorth = Float3.cross(worldPosition, worldEast);
+		
+		// Recompute directions to places.
+		Iterator<Float2> dotIt = dots.iterator();
+		Iterator<Place> placeIt = places.iterator();
+		while (dotIt.hasNext())
+			dotIt.next().set(computeDot(placeIt.next()));
 	}
 	
-	public void setPlaces(List<Place> places)
+	public void addPlaces(List<Place> places)
 	{
-		this.places = places;
-		// Automatically convert coordinates to radians.
+		this.places.addAll(places);
 		for (Place place : places)
-		{
-			place.setLatitude(degToRad(place.getLatitude()));
-			place.setLongitude(degToRad(place.getLongitude()));
-		}
-		recomputePlacesLayout();
+			dots.add(computeDot(place));
+	}
+	
+	public void addPlace(Place place)
+	{
+		places.add(place);
+		dots.add(computeDot(place));
 	}
 	
 	/*
@@ -215,50 +268,24 @@ public class CompassView extends View
 		invalidate();
 	}
 	
-	private void recomputePlacesLayout()
+	/*
+	 * Compute position of the colored dot associated with the place.
+	 * It determines the direction in which the place is drawn.
+	 */
+	private Float2 computeDot(Place place)
 	{
-		/*
-		 * Everything here is computed in coordinate system originated in the
-		 * center of the Earth (Earth radius is the unit of length) so don't
-		 * confuse variables with the local ones.
-		 */
-		if (places == null)
-			return;
-		
-		dots.clear();
-		
-		Float3 myPosition = positionOnSphere(latitude, longitude);
-		Float3 toNorthPole = Float3.dif(new Float3(0, 0, 1), myPosition);
-		Float3 east = Float3.cross(toNorthPole, myPosition).normalized();
-		Float3 north = Float3.cross(myPosition, east);
-		
-		for (Place place : places)
-		{
-			Float3 placePosition = positionOnSphere(place.getLatitude(),
-					place.getLongitude());
-			Float3 toPlace = Float3.dif(placePosition, myPosition);
-			Float2 toPlaceProjected = new Float2(
-					Float3.dot(east, toPlace),
-					Float3.dot(north, toPlace)
-				);
-			toPlaceProjected.normalize();
-			toPlaceProjected.y = -toPlaceProjected.y;
-			dots.add(toPlaceProjected);
-		}
-	}
-	
-	private float degToRad(float angle)
-	{
-		return 0.0174532925f * angle;
-	}
-	
-	private Float3 positionOnSphere(float latitude, float longitude)
-	{
-		float cosLatitude = FloatMath.cos(latitude);
-		return new Float3(
-				cosLatitude * FloatMath.cos(longitude),
-				cosLatitude * FloatMath.sin(longitude),
-				FloatMath.sin(latitude)
-		);
+		Float3 placePosition = Coordinates.positionOnSphere(
+				place.getLatitude(), place.getLongitude());
+		Float3 toPlace = Float3.dif(placePosition, worldPosition);
+		Float2 toPlaceProjected = new Float2(
+				Float3.dot(worldEast, toPlace),
+				Float3.dot(worldNorth, toPlace)
+			);
+		float len = toPlaceProjected.length();
+		if (len == 0)
+			toPlaceProjected.set(1, 0);
+		else
+			toPlaceProjected.div(len);
+		return toPlaceProjected;
 	}
 }

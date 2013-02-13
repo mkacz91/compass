@@ -3,12 +3,20 @@ package com.mkacz.compass;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.FloatMath;
+
+import com.mkacz.vector_math.Float3;
+
 /*
  * Basically a class to convert geographic coordinates to and from a string.
  */
 public class Coordinates
 {
 	public static final float INVALID_COORDINATE = 1000;
+	public static final float CRITICAL_LATITUDE = 89.43f; // Angle which cosine
+	                                                      // is less than 10^-2
+	public static final float WROCLAW_LATITUDE = 51;
+	public static final float WROCLAW_LONGITUDE = 17;
 	
     /*
      * Returns longitude based on a string.
@@ -80,4 +88,29 @@ public class Coordinates
     {
     	return String.valueOf(Math.abs(latitude)) + (latitude < 0 ? "S" : "N");
     }
+    
+    /*
+     * Computes 3D coordinates of a point on a unit sphere given its longitude
+     * and latitude. The coordinates are given in right handed system with
+     * North pole, i.e. 90N0E, at (0, 0, 1) and 0N0E at (1, 0, 0).
+     */
+	public static Float3 positionOnSphere(float latitude, float longitude)
+	{
+		latitude = degToRad(latitude);
+		longitude = degToRad(longitude);
+		float cosLatitude = FloatMath.cos(latitude);
+		return new Float3(
+				cosLatitude * FloatMath.cos(longitude),
+				cosLatitude * FloatMath.sin(longitude),
+				FloatMath.sin(latitude)
+		);
+	}
+	
+	/*
+	 * Simply convert an angle given in degrees to radians.
+	 */
+	public static float degToRad(float angle)
+	{
+		return 0.0174532925f * angle;
+	}
 }
